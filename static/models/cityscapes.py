@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
@@ -209,6 +209,7 @@ def jaccard_loss(
     return (1 - jac) * smooth
 
 
+"""
 class CityscapesViewerCallback(tf.keras.callbacks.Callback):
     def __init__(
         self, val_input_img_paths, val_label_colors_img_paths, img_size
@@ -249,3 +250,4 @@ class CityscapesViewerCallback(tf.keras.callbacks.Callback):
         ax[2].imshow(pred_colors)
 
         plt.show()
+        """
