@@ -1,8 +1,8 @@
 import os
 from flask import Flask, render_template, request, send_from_directory
-import static.models.unet_xception as mux
-import static.models.deeplab_v3plus as mdv3
-import static.models.cityscapes as cityscapes
+import .static.models.unet_xception as mux
+import .static.models.deeplab_v3plus as mdv3
+import .static.models.cityscapes as cityscapes
 import tensorflow as tf
 
 import numpy as np
@@ -97,4 +97,5 @@ def ground_truth_seg_file(filename):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    port = int(os.environ.get('PORT',5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
