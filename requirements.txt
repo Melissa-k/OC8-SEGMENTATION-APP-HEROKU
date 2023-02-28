@@ -1,2 +1,2 @@
 Flask
-tensorflow
+tensorflow-cpu
