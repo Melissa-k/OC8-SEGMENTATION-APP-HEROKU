@@ -1,3 +1,2 @@
 Flask
-tensorflow
-matplotlib
+tensorflow-cpu
