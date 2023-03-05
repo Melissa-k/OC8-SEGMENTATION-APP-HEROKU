@@ -1,8 +1,8 @@
 import os
 from flask import Flask, render_template, request, send_from_directory
-import .static.models.unet_xception as mux
-import .static.models.deeplab_v3plus as mdv3
-import .static.models.cityscapes as cityscapes
+import static.models.unet_xception as mux
+import static.models.deeplab_v3plus as mdv3
+import static.models.cityscapes as cityscapes
 import tensorflow as tf
 
 import numpy as np
