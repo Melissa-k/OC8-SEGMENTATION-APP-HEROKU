@@ -1,2 +1,3 @@
 Flask
 tensorflow-cpu
+pillow
