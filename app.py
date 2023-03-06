@@ -45,7 +45,7 @@ def load__model():
     model.load_weights(MODEL_FOLDER + model_name + ".h5")
     
 
-def predict(fullpath_image):
+def predict_(fullpath_image):
 
     #input_img = image.load_img(fullpath, target_size=(150, 150, 3))
     input_img = Image.open(fullpath_image).resize((resize, resize))
@@ -73,7 +73,7 @@ def index():
         fullname = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(fullname)
 
-        result = predict(fullname)
+        result = predict_(fullname)
         result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
 
         return render_template('index.html', image_file_name=file.filename,
@@ -82,6 +82,18 @@ def index():
 
         return render_template('index.html', predict=False)
 
+@app.route('/predict', methods=['POST', 'GET'])
+def predict():
+    if request.method == 'POST':
+        file = request.files['image']
+        fullname = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(fullname)
+
+        result = predict_(fullname)
+        result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
+
+        return render_template('index.html', image_file_name=file.filename,
+                               predict=True, result=RESULT_FOLDER +"pred1.png")
 
 @app.route('/<filename>')
 def send_file(filename):
