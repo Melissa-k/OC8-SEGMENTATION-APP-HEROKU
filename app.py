@@ -91,9 +91,12 @@ def predict():
 
         result = predict_(fullname)
         result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
+        
+        with open(os.path.join(RESULT_FOLDER +"pred1.png"),  "rb") as f :
+            img_enc = base64.b64encode(f.read())
 
-        return render_template('index.html', image_file_name=file.filename,
-                               predict=True, result=RESULT_FOLDER +"pred1.png")
+        return jsonify({"image":img_enc})
+
 
 @app.route('/<filename>')
 def send_file(filename):
