@@ -79,11 +79,7 @@
         <img src="{{ url_for('send_file', filename=image_file_name)}}" style ="max-width: 500px; max-height: 450px; margin-top: 30px; margin-bottom: 10px">
         <img src="{{ url_for('result_file', filename=result)}}" style ="max-width: 500px; max-height: 450px; margin-top: 30px; margin-bottom: 10px">
 
-
-        <h3><b>I'm <span style="color: green;">{{ result }} %</span> sure this is
-            <span style="color: red;">{{ result }}</span></b>
-        </h3>
-            <a href="/">Make another prediction</a>
+        <a href="/">Make another prediction</a>
 
         </div>
         {% endif %}
