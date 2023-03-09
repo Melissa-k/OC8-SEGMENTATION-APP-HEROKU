@@ -44,12 +44,9 @@ def load__model():
 
     model.load_weights(MODEL_FOLDER + model_name + ".h5")
     
-
-def predict_(fullpath_image):
-
-    #input_img = image.load_img(fullpath, target_size=(150, 150, 3))
-    input_img = Image.open(fullpath_image).resize((resize, resize))
-    
+def pred_(input_img):
+    """input_img est un numpy array (une image)
+    """
     # Prediction:
     result = Image.fromarray(
         cityscapes.cityscapes_category_ids_to_category_colors(
@@ -62,8 +59,15 @@ def predict_(fullpath_image):
         )
     )
     #result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
-
     return result #RESULT_FOLDER + "pred1.png"
+
+def prediction(fullpath_image):
+
+    #input_img = image.load_img(fullpath, target_size=(150, 150, 3))
+    input_img = Image.open(fullpath_image).resize((resize, resize))
+    # Prediction:
+    return pred_(input_img)
+    
 
 # Home Page
 @app.route('/', methods=['POST', 'GET'])
@@ -73,7 +77,7 @@ def index():
         fullname = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(fullname)
 
-        result = predict_(fullname)
+        result = prediction(fullname)
         result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
 
         return render_template('index.html', image_file_name=file.filename,
@@ -85,17 +89,22 @@ def index():
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     if request.method == 'POST':
-        file = request.files['image']
-        fullname = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(fullname)
-
-        result = predict_(fullname)
-        result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
+        encStr = request.json['image']
         
-        with open(os.path.join(RESULT_FOLDER +"pred1.png"),  "rb") as f :
-            img_enc = base64.b64encode(f.read())
+        # get the encoded json dump
+        image_encoded = json.loads(encStr)
 
-        return jsonify({"image":img_enc})
+        # build the numpy data type
+        dataType = numpy.dtype(image_encoded [0])
+
+        # decode the base64 encoded numpy array data and create a new numpy array with this data & type
+        input_img_array = numpy.frombuffer(base64.decodestring(image_encoded[1]), dataType)
+
+        result_img_array = pred_(input_img_array)
+        result_img_json = json.dumps([str(result_img_array.dtype), base64.b64encode(result_img_array), result_img_array.shape])
+        #result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
+        
+        return result_img_json
 
 
 @app.route('/<filename>')
