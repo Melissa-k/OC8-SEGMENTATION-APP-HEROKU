@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!--<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon"> -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </head>
 
 
@@ -41,7 +41,7 @@
     .vl {
       border-right: 6px solid green;
       height: 500px;
-
+    }
 </style>
 
 <body>
@@ -61,7 +61,6 @@
                         Upload Image <input type="file" name="image">
                     </span>
 
-
                     <span class="text-right">
                         <input type="submit" value="Predict" class="btn btn-primary">
                     </span>
@@ -71,20 +70,26 @@
             <div class="col-sm-2">
                 <div class="vl"></div>
             </div>
-          {% endif %}
-        <div class="col-sm-6">
-
-        {% if predict %}
-        <div style="width: 90%; margin: auto; text-align: center">
-        <img src="{{ url_for('send_file', filename=image_file_name)}}" style ="max-width: 500px; max-height: 450px; margin-top: 30px; margin-bottom: 10px">
-        <img src="{{ url_for('result_file', filename=result)}}" style ="max-width: 500px; max-height: 450px; margin-top: 30px; margin-bottom: 10px">
-
-        <a href="/">Make another prediction</a>
-
         </div>
         {% endif %}
 
-      </div>
+        {% if predict %}
+        <div class="row col-sm-12">
+
+            <div class="row col-sm-6" style="width: 90%; margin: auto; text-align: center">
+                <img src="{{ url_for('send_file', filename=image_file_name)}}" >
+            </div>
+            <div class="row col-sm-6" style="width: 90%; margin: auto; text-align: center">
+                <img src="{{ url_for('result_file', result_filename=result_fname)}}" >
+            </div>
+                
+        </div>
+        <br> <br>
+        <div class="row col-sm-12" style="width: 90%; margin: auto; text-align: center">
+            <a href="/">Make another prediction</a>
+        </div>
+        <br> <br>
+      {% endif %}
     </div>
 
     </div>
