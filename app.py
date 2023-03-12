@@ -1,20 +1,22 @@
-import os
-from flask import Flask, render_template, request, send_from_directory
-import static.models.unet_xception as mux
-import static.models.deeplab_v3plus as mdv3
-import static.models.cityscapes as cityscapes
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import tensorflow as tf
-
+import static.models.cityscapes as cityscapes
+#import static.models.unet_xception as mux
+import static.models.deeplab_v3plus as mdv3
 import numpy as np
+import base64
+import os
+import io
 from PIL import Image
 
+import json
 
 app = Flask(__name__)
 
 STATIC_FOLDER = 'static/'
-MODEL_FOLDER = STATIC_FOLDER + 'models/'
-UPLOAD_FOLDER = STATIC_FOLDER + 'uploads/'
-RESULT_FOLDER = STATIC_FOLDER + 'results/'
+MODEL_FOLDER = os.path.join(STATIC_FOLDER, 'models/')
+UPLOAD_FOLDER = os.path.join(STATIC_FOLDER,'uploads/')
+RESULT_FOLDER = os.path.join(STATIC_FOLDER,'results/')
 
 @app.before_first_request
 def load__model():
@@ -43,10 +45,13 @@ def load__model():
     print(model.name)
 
     model.load_weights(MODEL_FOLDER + model_name + ".h5")
-    
-def pred_(input_img):
-    """input_img est un numpy array (une image)
-    """
+
+
+def prediction(fullpath_image):
+    #input_img = tf.keras.preprocessing.image.load_img(fullpath_image, target_size=(resize, resize))
+    resize = 512
+    input_img = Image.open(fullpath_image).resize((resize, resize))
+
     # Prediction:
     result = Image.fromarray(
         cityscapes.cityscapes_category_ids_to_category_colors(
@@ -58,66 +63,66 @@ def pred_(input_img):
             )
         )
     )
-    #result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
-    return result #RESULT_FOLDER + "pred1.png"
-
-def prediction(fullpath_image):
-
-    #input_img = image.load_img(fullpath, target_size=(150, 150, 3))
-    input_img = Image.open(fullpath_image).resize((resize, resize))
-    # Prediction:
-    return pred_(input_img)
+    return result
     
 
+@app.route('/api/predict/', methods=['POST'])
+def predict_segmentation():
+
+    if request.method == 'POST':
+        image_file = request.files.get('image')
+        
+        # Do something with the image file
+        image_data = image_file.read()
+        image_resized = Image.open(io.BytesIO(image_data)).resize((resize, resize))
+        fullname = os.path.join(UPLOAD_FOLDER, image_file.filename)
+        image_resized.save(fullname)
+        
+        result = prediction(fullname)
+        result.save(os.path.join(RESULT_FOLDER,"result_img.png"))
+        fullpath_res = os.path.join(RESULT_FOLDER,"result_img.png")
+        with open(fullpath_res, "rb") as imag_file:
+            img_enc = base64.b64encode(imag_file.read()).decode()
+    
+        return jsonify({"image":img_enc})
+
+        
 # Home Page
 @app.route('/', methods=['POST', 'GET'])
 def index():
     if request.method == 'POST':
-        file = request.files['image']
-        fullname = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(fullname)
+        image_input_file = request.files['image']
 
-        result = prediction(fullname)
-        result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
+        # Do something with the image file
+        image_data = image_input_file.read()
+        image_resized = Image.open(io.BytesIO(image_data)).resize((resize, resize))
+        fullpath_image_input  = os.path.join(UPLOAD_FOLDER, image_input_file.filename)
+        image_resized.save(fullpath_image_input )
 
-        return render_template('index.html', image_file_name=file.filename,
-                               predict=True, result=RESULT_FOLDER +"pred1.png")
+        # Prediction
+        result = prediction(fullpath_image_input)
+        result_fname = "result_"+image_input_file.filename
+        fullpath_res = os.path.join(UPLOAD_FOLDER, result_fname)
+        result.save(fullpath_res)
+
+        return render_template('index.html', predict=True, image_file_name=image_input_file.filename, 
+                               result_fname=result_fname)
     else:
-
         return render_template('index.html', predict=False)
-
-@app.route('/predict', methods=['POST', 'GET'])
-def predict():
-    if request.method == 'POST':
-        encStr = request.json['image']
-        
-        # get the encoded json dump
-        image_encoded = json.loads(encStr)
-
-        # build the numpy data type
-        dataType = numpy.dtype(image_encoded [0])
-
-        # decode the base64 encoded numpy array data and create a new numpy array with this data & type
-        input_img_array = numpy.frombuffer(base64.decodestring(image_encoded[1]), dataType)
-
-        result_img_array = pred_(input_img_array)
-        result_img_json = json.dumps([str(result_img_array.dtype), base64.b64encode(result_img_array), result_img_array.shape])
-        #result.save(os.path.join(RESULT_FOLDER +"pred1.png"), format="PNG")
-        
-        return result_img_json
-
 
 @app.route('/<filename>')
 def send_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-@app.route('/<filename>')
-def result_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@app.route('/<result_filename>')
+def result_file(result_filename):
+    return send_from_directory(UPLOAD_FOLDER, result_filename)
 
+"""
 @app.route('/<filename>')
 def ground_truth_seg_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
+""" 
 
 
 if __name__ == '__main__':
